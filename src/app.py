@@ -42,7 +42,7 @@ def handle_message(event):
     #     TextSendMessage(text=event.message.text))
 
     if event.message.type == "text":
-        text = event.message.text
+        text = event.message.text.lower()
 
         if text == "search for code":
             content = "請輸入想查詢的銀行"
@@ -62,7 +62,7 @@ def handle_message(event):
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
             return 0
     
-    elif event.message.type == "sticker":
+    else:
         line_bot_api.reply_message(event.reply_token, StickerSendMessage(package_id=11538, sticker_id=51626512))
         return 0
     
