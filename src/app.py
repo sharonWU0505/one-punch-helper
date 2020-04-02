@@ -1,7 +1,7 @@
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, StickerSendMessage
 import os
 import random
 
@@ -41,24 +41,31 @@ def handle_message(event):
     #     event.reply_token,
     #     TextSendMessage(text=event.message.text))
 
-    text = event.message.text.lower()
+    if event.message.type == "text":
+        text = event.message.text
 
-    if text == "search for code":
-        content = "請輸入"
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
-        return 0
+        if text == "search for code":
+            content = "請輸入想查詢的銀行"
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
+            return 0
 
-    if text == "let's chat" or text == "send me emoticon":
-        content = "不行喔！"
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
+        elif text == "let's chat" or text == "send me emoticon":
+            content = "不行喔！"
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
+            return 0
+        
+        else:
+            matched_banks = [(key + " " + val) for key, val in bank_dist.items() if text in key]
+            content = "找不到啦～"
+            if len(matched_banks):
+                content = "\n".join(matched_banks)
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
+            return 0
+    
+    elif event.message.type == "sticker":
+        line_bot_api.reply_message(event.reply_token, StickerSendMessage(package_id=11538, sticker_id=51626512))
         return 0
     
-    if text:
-        matched_banks = [(key + " " + val) for key, val in bank_dist.items() if text in key]
-        content = "\n".join(matched_banks)
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=content))
-        return 0
-
     random_set = [
         "嗨嗨嗨",
         "晚餐要吃什麼？",
